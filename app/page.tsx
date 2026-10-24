@@ -120,7 +120,7 @@ export default function Home() {
   };
 
   const clearAllNotes = () => {
-    if (confirm('Are you sure you want to wipe all notes and reset local storage?')) {
+    if (confirm('Are you sure you want to wipe all notes and reset local storage? This is irreversible. Once done, you will be returned to the initial note again !!!')) {
       localStorage.removeItem('markdown_notes');
       loadDefaultNote();
     }
