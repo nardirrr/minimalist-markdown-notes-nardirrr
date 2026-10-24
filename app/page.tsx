@@ -221,7 +221,7 @@ export default function Home() {
             onClick={clearAllNotes}
             className="w-full py-2 bg-red-950/40 text-red-400 border border-red-900/50 text-xs font-medium rounded hover:bg-red-900/40 transition"
           >
-            Clear All Data
+            Clear All Data / Cache
           </button>
         </div>
       </aside>
