@@ -22,7 +22,7 @@ export default function Home() {
     const welcomeNote: Note = {
       id: (now - 1).toString(), // Offset ensures IDs never collide
       title: 'README',
-      content: '# Hello Markdown\n\nStart typing on the left hand side. Watch it render on the right hand side, using markdown formatting.\n\nZero backend database\n\nFully local, not cloud based\n\n **Markdown Syntax**\n\n ** Before and after will be bold\n\n "*" Before (with space) will be a list / bulletpoint\n\n "*" With no space, before and after is italic\n\n **Test Bold**\n\n *Test Italic*\n\n* Test List\n\n # Before text (with space) is a heading',
+      content: '# Hello Markdown\n\nStart typing on the left hand side. Watch it render on the right hand side, using markdown formatting.\n\nZero backend database\n\nFully local, not cloud based\n\n ****\n\n # Markdown Syntax\n\n ** Before and after will be bold\n\n "*" Before (with space) will be a list / bulletpoint\n\n "*" With no space, before and after is italic\n\n ****\n\n **Test Bold**\n\n *Test Italic*\n\n* Test List\n\n # Before text (with space) is a heading',
       updatedAt: now - 1,
     };
 
