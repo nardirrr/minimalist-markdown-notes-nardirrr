@@ -26,7 +26,7 @@ export default function Home() {
       updatedAt: now - 1,
     };
 
-    const initialBlankNote: Note = {
+    const initialBlankNote: Note = { //Initial note that the user will be presented with at the start
       id: now.toString(),
       title: 'Untitled Note',
       content: '# New Note\n\n',
@@ -108,7 +108,7 @@ export default function Home() {
     );
   };
 
-  const deleteSpecificNote = (id: string) => {
+  const deleteSpecificNote = (id: string) => { // Function to delete the selected ntoe
     const remaining = notes.filter((n) => n.id !== id);
     setNotes(remaining);
     if (activeId === id && remaining.length > 0) {
@@ -119,7 +119,7 @@ export default function Home() {
     }
   };
 
-  const clearAllNotes = () => {
+  const clearAllNotes = () => { // Delete cache function
     if (confirm('Are you sure you want to wipe all notes and reset local storage? This is irreversible. Once done, you will be returned to the initial note again !!!')) {
       localStorage.removeItem('markdown_notes');
       loadDefaultNote();
