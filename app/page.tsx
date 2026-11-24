@@ -8,6 +8,7 @@ interface Note {
   title: string;
   content: string;
   updatedAt: number;
+  isCustomTitle?: boolean;
 }
 
 export default function Home() {
@@ -15,7 +16,10 @@ export default function Home() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isDark, setIsDark] = useState<boolean>(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState<string>('');
   const noteCounterRef = useRef<number>(1);
+  const skipBlurRef = useRef<boolean>(false);
 
   const loadDefaultNote = () => {
     const now = Date.now();
@@ -117,6 +121,32 @@ export default function Home() {
     setIsSidebarOpen(false); // Close drawer on mobile after creating
   };
 
+  const startRenaming = (note: Note) => {
+    skipBlurRef.current = false;
+    setEditingNoteId(note.id);
+    setEditingTitle(note.title);
+  };
+
+  const commitRename = (id: string) => {
+    const trimmed = editingTitle.trim();
+    if (trimmed) {
+      setNotes(
+        notes.map((n) =>
+          n.id === id
+            ? { ...n, title: trimmed, isCustomTitle: true, updatedAt: Date.now() }
+            : n
+        )
+      );
+    }
+    setEditingNoteId(null);
+    setEditingTitle('');
+  };
+
+  const cancelRename = () => {
+    setEditingNoteId(null);
+    setEditingTitle('');
+  };
+
   const updateContent = (content: string) => {
     if (!activeNote) return;
 
@@ -125,13 +155,21 @@ export default function Home() {
     setNotes(
       notes.map((n) =>
         n.id === activeNote.id
-          ? { ...n, content, title: firstLine, updatedAt: Date.now() }
+          ? {
+            ...n,
+            content,
+            title: n.isCustomTitle ? n.title : firstLine,
+            updatedAt: Date.now(),
+          }
           : n
       )
     );
   };
 
   const deleteSpecificNote = (id: string) => { // Function to delete the selected ntoe
+    if (editingNoteId === id) {
+      cancelRename();
+    }
     const remaining = notes.filter((n) => n.id !== id);
     setNotes(remaining);
     if (activeId === id && remaining.length > 0) {
@@ -215,27 +253,73 @@ export default function Home() {
         </div>
 
         <div className="overflow-y-auto flex-1 p-2 space-y-1">
-          {notes.map((note) => (
-            <div
-              key={note.id}
-              onClick={() => {
-                setActiveId(note.id);
-                setIsSidebarOpen(false);
-              }}
-              className={`group px-3 py-2.5 rounded cursor-pointer flex items-center justify-between transition ${note.id === activeId ? theme.activeItem : theme.hoverItem}`}
-            >
-              <div className="truncate text-xs font-medium pr-2">{note.title}</div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  deleteSpecificNote(note.id);
+          {notes.map((note) => {
+            const isEditing = editingNoteId === note.id;
+            return (
+              <div
+                key={note.id}
+                onClick={() => {
+                  if (!isEditing) {
+                    setActiveId(note.id);
+                    setIsSidebarOpen(false);
+                  }
                 }}
-                className="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-400 text-xs px-1 transition"
+                className={`group px-3 py-2.5 rounded cursor-pointer flex items-center justify-between gap-2 transition ${note.id === activeId ? theme.activeItem : theme.hoverItem}`}
               >
-                ×
-              </button>
-            </div>
-          ))}
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={editingTitle}
+                    autoFocus
+                    onFocus={(e) => e.currentTarget.select()}
+                    onChange={(e) => setEditingTitle(e.target.value)}
+                    onBlur={() => {
+                      if (skipBlurRef.current) {
+                        skipBlurRef.current = false;
+                        return;
+                      }
+                      commitRename(note.id);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        skipBlurRef.current = true;
+                        commitRename(note.id);
+                      } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        skipBlurRef.current = true;
+                        cancelRename();
+                      }
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    onDoubleClick={(e) => e.stopPropagation()}
+                    className={`flex-1 min-w-0 px-1.5 py-0.5 -my-0.5 text-xs font-medium rounded border focus:outline-none ${isDark ? 'bg-zinc-950 text-white border-zinc-600 focus:border-zinc-400' : 'bg-white text-zinc-950 border-zinc-300 focus:border-zinc-500'}`}
+                  />
+                ) : (
+                  <div
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      startRenaming(note);
+                    }}
+                    title="Double-click to rename"
+                    className="flex-1 min-w-0 truncate text-xs font-medium pr-2"
+                  >
+                    {note.title}
+                  </div>
+                )}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteSpecificNote(note.id);
+                  }}
+                  onDoubleClick={(e) => e.stopPropagation()}
+                  className="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-400 text-xs px-1 transition shrink-0"
+                >
+                  ×
+                </button>
+              </div>
+            );
+          })}
         </div>
 
         {/* Sidebar Footer: Clear Storage Button */}
