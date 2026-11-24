@@ -17,7 +17,6 @@ This application provides a distraction-free drafting environment for structured
 ### Key Capabilities
 * **Reactive AST Parsing:** Renders Markdown directly into semantic HTML using `react-markdown` with syntax support for headers, emphasis, and itemised lists.
 * **Offline-First Persistence:** Synchronises state directly with browser `localStorage`, preserving active sessions and documents across page reloads.
-* **Dynamic Header Extraction:** Automatically parses the first Markdown heading (`# Title`) using regular expressions to dynamically update document tree labels in real time.
 * **Zero Backend Exposure:** Sandboxes all note contents locally within the browser, avoiding database latency and external privacy trade-offs.
 * **Theme & Layout Engine:** Features a split-pane workstation layout on desktop and an adaptive mobile drawer, coupled with persistent dark/light theme switching.
 
@@ -47,7 +46,7 @@ In Next.js, components pre-render server-side where the global `window` and `loc
 
 ---
 
-## Getting Started
+## Getting Started (Access Source Code)
 
 ### Prerequisites
 * Node.js 18.x or later

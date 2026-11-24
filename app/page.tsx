@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 interface Note {
@@ -15,6 +15,7 @@ export default function Home() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isDark, setIsDark] = useState<boolean>(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const noteCounterRef = useRef<number>(1);
 
   const loadDefaultNote = () => {
     const now = Date.now();
@@ -38,14 +39,24 @@ export default function Home() {
 
     // Opens directly to the blank note
     setActiveId(initialBlankNote.id);
+    noteCounterRef.current = 1;
+    localStorage.removeItem('markdown_note_counter');
   };
 
   // Load notes and theme preference on mount
   useEffect(() => {
     const saved = localStorage.getItem('markdown_notes');
     const savedTheme = localStorage.getItem('markdown_theme');
+    const savedCounter = localStorage.getItem('markdown_note_counter');
     if (savedTheme !== null) {
       setIsDark(savedTheme === 'dark');
+    }
+
+    if (savedCounter !== null) {
+      const parsedCounter = parseInt(savedCounter, 10);
+      if (!Number.isNaN(parsedCounter) && parsedCounter >= 1) {
+        noteCounterRef.current = parsedCounter;
+      }
     }
 
     if (saved) {
@@ -83,12 +94,24 @@ export default function Home() {
   const activeNote = notes.find((n) => n.id === activeId) || notes[0];
 
   const createNote = () => {
+    const maxExistingNumber = notes.reduce((max, note) => {
+      const match = note.title.match(/^Note (\d+)$/);
+      return match ? Math.max(max, parseInt(match[1], 10)) : max;
+    }, 0);
+    const nextNumber = Math.max(noteCounterRef.current, maxExistingNumber + 1);
+    const noteTitle = `Note ${nextNumber}`;
+    const now = Date.now();
+    const id = notes.some((n) => n.id === now.toString()) ? `${now}-${nextNumber}` : now.toString();
+
     const newNote: Note = {
-      id: Date.now().toString(),
-      title: 'Untitled Note',
-      content: '# New Note\n\nWrite your thoughts here...',
-      updatedAt: Date.now(),
+      id,
+      title: noteTitle,
+      content: `# ${noteTitle}\n\nWrite your thoughts here...`,
+      updatedAt: now,
     };
+    const nextCounter = nextNumber + 1;
+    noteCounterRef.current = nextCounter;
+    localStorage.setItem('markdown_note_counter', nextCounter.toString());
     setNotes([newNote, ...notes]);
     setActiveId(newNote.id);
     setIsSidebarOpen(false); // Close drawer on mobile after creating
