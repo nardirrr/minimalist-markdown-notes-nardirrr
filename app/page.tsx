@@ -29,7 +29,7 @@ export default function Home() {
 
     const initialBlankNote: Note = { //Initial note that the user will be presented with at the start
       id: now.toString(),
-      title: 'Untitled Note',
+      title: 'Note1',
       content: '# New Note\n\n <-- Read Instructions',
       updatedAt: now,
     };
